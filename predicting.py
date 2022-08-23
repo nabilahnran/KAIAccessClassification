@@ -1,9 +1,12 @@
+import os
 import pandas as pd
 import numpy as np
-import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+import sys
+
+current_folder = os.getcwd()
 
 pd.set_option('display.max_columns', 4)
 pd.set_option('display.max_colwidth', 16)
@@ -16,16 +19,79 @@ max_length = 150
 test_portion = 0.2
 embedding_dim = 16
 
+
+#load data training
 data_vocab = pd.read_csv('KAIAccess_final_ver3-numberremoved-nulltextremoved-fixed.csv')
 data_vocab.review_text=data_vocab.review_text.astype(str)
 data_vocab.drop(columns=['app_ver_name', 'reviewer_language','device', 'review_month', 'star_rating'],
                 inplace = True)
-data_predict = pd.read_csv('labelled_tambahan.csv')
+
+#load data mentah
+input_data = False
+while input_data == False:
+    predict_file = input('---MASUKKAN PATH FILE DATA YANG INGIN DIKLASIFIKASIKAN---\nJika pada folder yang '
+                     'sama masukkan nama filenya saja (format .csv) \n Masukkan disini: ')
+    try:
+        data_predict = pd.read_csv(predict_file, delimiter=';')
+        input_data = True
+    except:
+        answer = input('Path file yang anda masukkan salah. Coba lagi? y/n ')
+        if answer != 'y':
+            sys.exit()
+
+
+
+#nama data hasil
+result_file = input ('---MASUKKAN NAMA FILE BARU UNTUK MENYIMPAN HASIL KLASIFIKASI---\n '
+                     '(format .csv) Masukkan disini: ')
+
+#load saved model
 
 sent_model = load_model('nonull_model_sent-nonumber.h5')
-topic_model = load_model('nonull_model_topic-nonumber.h5')
-detail_model = load_model('nonull_model_detail-nonumber.h5')
+topic_model = load_model('fix_topic.h5')
+detail_model = load_model('fix_detail.h5')
 
+#data cleaning function
+def preprocessing(data_predict):
+    print(data_predict.columns)
+    print(len(data_predict))
+    # Cleaning punctuation, space, emoji, capital letter
+    # Remove punctuation and emojis
+    data_predict['Review Text'] = data_predict['Review Text'].str.replace('[^\w\s]', '')
+    # Lowering Case
+    data_predict['Review Text'] = data_predict['Review Text'].str.lower()
+    # remove URLs
+    data_predict['Review Text'] = data_predict['Review Text'].replace(r'http\S+', '', regex=True)\
+        .replace(r'www\S+', '', regex=True)
+    # remove newlines
+    data_predict['Review Text'] = data_predict['Review Text'].str.replace('\n', ' ')
+    # replace two space to one
+    data_predict['Review Text'] = data_predict['Review Text'].str.replace('\s\s+', ' ', regex=True)
+    # remove leading space
+    data_predict['Review Text'] = data_predict['Review Text'].replace('^ +| +$', '', regex=True)
+    #remove number
+    data_predict['Review Text'] = data_predict['Review Text'].str.replace('\d+', '')
+    #remove single letter
+    data_predict['Review Text'] = data_predict['Review Text'].str.replace(r'\b\w\b', '').str.replace(r'\s+', ' ')
+    print(data_predict[data_predict['Review Text'].isnull()])
+    #remove data that have no review text
+    data_predict = data_predict.drop(data_predict[data_predict['Review Text'].isnull()].index)
+
+    # WITH NO STOPWORDS
+    """f = open("id-stopwords.txt", "r")
+    list = f.read().splitlines()
+    print(list)
+    data_predict['Review Text'] = data_predict['Review Text'].apply(lambda x: ' '.join([word for word in x.split()
+                                                                        if word not in (list)]))
+    """
+    # manipulate NaN values
+    data_predict.loc[(data_predict['App Version Name'].isnull()), 'App Version Name'] = 'unknown'
+    data_predict.loc[(data_predict.Device.isnull()), 'device'] = 'unknown'
+
+    return data_predict
+
+
+#tokenizing training data
 def process_vocab(data_vocab):
     train_set = data_vocab
     text_train = train_set['review_text']
@@ -61,45 +127,8 @@ def process_vocab(data_vocab):
     return tokenizer, text_word_index, sent_tokenizer, sent_word_index,\
            topic_tokenizer, topic_word_index, detail_tokenizer, detail_word_index
 
-def preprocessing(data_predict):
-    data_predict.drop(columns=['sentiment', 'topic', 'detail_topic'], inplace =True)
-    print(data_predict.columns)
-    print(len(data_predict))
-    # Cleaning punctuation, space, emoji, capital letter
-    # Remove punctuation and emojis
-    data_predict['Review Text'] = data_predict['Review Text'].str.replace('[^\w\s]', '')
-    # Lowering Case
-    data_predict['Review Text'] = data_predict['Review Text'].str.lower()
-    # remove URLs
-    data_predict['Review Text'] = data_predict['Review Text'].replace(r'http\S+', '', regex=True)\
-        .replace(r'www\S+', '', regex=True)
-    # remove newlines
-    data_predict['Review Text'] = data_predict['Review Text'].str.replace('\n', ' ')
-    # replace two space to one
-    data_predict['Review Text'] = data_predict['Review Text'].str.replace('\s\s+', ' ', regex=True)
-    # remove leading space
-    data_predict['Review Text'] = data_predict['Review Text'].replace('^ +| +$', '', regex=True)
-    #remove number
-    data_predict['Review Text'] = data_predict['Review Text'].str.replace('\d+', '')
-    #remove single letter
-    data_predict['Review Text'] = data_predict['Review Text'].str.replace(r'\b\w\b', '').str.replace(r'\s+', ' ')
-    print(data_predict[data_predict['Review Text'].isnull()])
-    #remove data that have no review text
-    data_predict.drop(data_predict[data_predict['Review Text'].isnull()].index, inplace= True )
 
-    # WITH NO STOPWORDS
-    """f = open("id-stopwords.txt", "r")
-    list = f.read().splitlines()
-    print(list)
-    data_predict['Review Text'] = data_predict['Review Text'].apply(lambda x: ' '.join([word for word in x.split()
-                                                                        if word not in (list)]))
-    """
-    # manipulate NaN values
-    data_predict.loc[(data_predict['App Version Name'].isnull()), 'App Version Name'] = 'unknown'
-    data_predict.loc[(data_predict.Device.isnull()), 'device'] = 'unknown'
-
-    return data_predict
-
+#data tokenizing and sentiment classification
 def predict_sentiment(data_predict):
     input = np.array(data_predict['Review Text'])
     prediction = sent_model.predict(np.array(pad_sequences(tokenizer.texts_to_sequences(input),
@@ -109,8 +138,6 @@ def predict_sentiment(data_predict):
     for row in range(len(prediction)):
         result = prediction[row].tolist().index(np.max(prediction[row]))
         list_result.append(result)
-        print("prediction- " + str(row) + " : " + str(result) + " with " + str(
-            100 * max(prediction[row].tolist() * 100)) + " percentage")
     pre_result = []
     for s in list_result:
         pre_result.append(sent_tokenizer.index_word[s])
@@ -119,6 +146,7 @@ def predict_sentiment(data_predict):
     print(data_predict[['Review Text', 'Sentiment Prediction']])
     return data_predict
 
+#data tokenizing and topic classification
 def predict_topic(data_predict):
     input_text = np.array(data_predict['Review Text'])
     input_text = pad_sequences(tokenizer.texts_to_sequences(input_text),
@@ -132,8 +160,6 @@ def predict_topic(data_predict):
     for row in range(len(prediction)):
         result = prediction[row].tolist().index(np.max(prediction[row]))
         list_result.append(result)
-        print("prediction- " + str(row) + " : " + str(result) + " with " + str(
-            100 * max(prediction[row].tolist() * 100)) + " percentage")
     pre_result = []
     for s in list_result:
         pre_result.append(topic_tokenizer.index_word[s])
@@ -142,6 +168,7 @@ def predict_topic(data_predict):
     print(data_predict[['Review Text', 'Sentiment Prediction', 'Topic Prediction']])
     return data_predict
 
+#data tokenizing and detail topic classification
 def predict_detail(data_predict):
     input_text = np.array(data_predict['Review Text'])
     input_text = pad_sequences(tokenizer.texts_to_sequences(input_text),
@@ -159,8 +186,6 @@ def predict_detail(data_predict):
     for row in range(len(prediction)):
         result = prediction[row].tolist().index(np.max(prediction[row]))
         list_result.append(result)
-        print("prediction- " + str(row) + " : " + str(result) + " with " + str(
-            100 * max(prediction[row].tolist() * 100)) + " percentage")
 
     preresult = []
 
@@ -171,6 +196,7 @@ def predict_detail(data_predict):
     print(data_predict[['Review Text', 'Sentiment Prediction', 'Topic Prediction', 'Detail Prediction']])
     return data_predict
 
+#rename columns for proper classification
 def rename(data_predict):
     data_predict.loc[(data_predict['Sentiment Prediction'] == 'positif'), 'Sentiment Prediction'] = 'positive'
     data_predict.loc[(data_predict['Sentiment Prediction'] == 'negatif'), 'Sentiment Prediction'] = 'negative'
@@ -197,14 +223,19 @@ def rename(data_predict):
     data_predict.loc[(data_predict['Detail Prediction'] == 'baik'), 'Detail Prediction'] = 'good'
     data_predict.loc[(data_predict['Detail Prediction'] == 'lain'), 'Detail Prediction'] = 'others'
     data_predict.loc[(data_predict['Detail Prediction'] == 'aksesapp'), 'Detail Prediction'] = 'app access'
-    data_predict.drop(columns=['Unnamed: 0'], inplace=True)
+    data_predict = data_predict.drop(columns=['Unnamed: 0'])
     print(data_predict[['Review Text', 'Sentiment Prediction', 'Topic Prediction', 'Detail Prediction']])
 
 if __name__ == '__main__':
-    data_predict = preprocessing(data_predict)
+    # preprocessing data mentah baru untuk dibersihkan
+    #data_predict = preprocessing(data_predict)
+    # tokenizing data lama untuk list vocabulary token
     tokenizer, text_word_index, sent_tokenizer, sent_word_index, topic_tokenizer, topic_word_index, detail_tokenizer, detail_word_index = process_vocab(data_vocab)
+    # data baru diklasifikasikan untuk label sentimen
     data_predict = predict_sentiment(data_predict)
+    # data baru diklasifikasikan untuk label topik
     data_predict = predict_topic(data_predict)
+    # data baru diklasifikasikan untuk data detail topik
     data_predict = predict_detail(data_predict)
-    data_predict = rename(data_predict)
-    #data_predict.to_csv('result_labelled_tambahan.csv')
+    data_predict.to_csv(result_file)
+    print("Dataset hasil klasifikasi berhasil disimpan pada\n" + current_folder+ "/"+ result_file)
