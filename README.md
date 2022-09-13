@@ -15,6 +15,13 @@ Proyek ini adalah salah satu proyek dalam kegiatan magang yang dilakukan di PT K
 
   Hasil dari proyek KAI Access ini adalah data yang dapat diklasifikasikan secara langsung dengan machine learning. Klasifikasi pada proyek ini dilakukan untuk 3 label yaitu sentimen, topik, dan detail topik. Hal ini dikarenakan proyek KAI Access membutuhkan hasil klasifikasi topik yang lebih detail untuk dapat mengidentifikasi keluhan pengguna pada sistem dengan spesifik lebih cepat. Selain klasifikasi, proyek ini juga menghasilkan insight dari analisis yang dilakukan dari data ulasan KAI Access ini. Insight yang divisualisasikan seperti jumlah data ulasan perbulan, versi yang paling banyak dipakai, jumlah dan rata-rata rating penilaian, dan jumlah data setiap kelas pada label sentimen, topik, dan detail topik.
   
+###Cara menjalankan Prototype
+1. Download folder 'prototype'
+2. Jalankan file 'predicting with no test set and no nulltext.py' pada IDE
+3. Masukkan nama file data yang ingin diklasifikasikan pada prompt
+4. Masukkan nama file data untuk disimpan isi hasil klasifikasi
+5. Hasil klasifikasi telah disimpan pada nama file yang diinputkan pada nomor 4.
+  
 **Gambaran Prototype Klasifikasi Data Ulasan KAI Access
 
 (Proses pemasukan file)
