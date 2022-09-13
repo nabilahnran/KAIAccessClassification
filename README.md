@@ -16,8 +16,10 @@ Proyek ini adalah salah satu proyek dalam kegiatan magang yang dilakukan di PT K
   Hasil dari proyek KAI Access ini adalah data yang dapat diklasifikasikan secara langsung dengan machine learning. Klasifikasi pada proyek ini dilakukan untuk 3 label yaitu sentimen, topik, dan detail topik. Hal ini dikarenakan proyek KAI Access membutuhkan hasil klasifikasi topik yang lebih detail untuk dapat mengidentifikasi keluhan pengguna pada sistem dengan spesifik lebih cepat. Selain klasifikasi, proyek ini juga menghasilkan insight dari analisis yang dilakukan dari data ulasan KAI Access ini. Insight yang divisualisasikan seperti jumlah data ulasan perbulan, versi yang paling banyak dipakai, jumlah dan rata-rata rating penilaian, dan jumlah data setiap kelas pada label sentimen, topik, dan detail topik.
   
 **Gambaran Prototype Klasifikasi Data Ulasan KAI Access
+
 (Proses pemasukan file)
 <img width="434" alt="image" src="https://user-images.githubusercontent.com/57905354/189805350-4aa752f8-c397-467a-91ec-b6a87a976602.png">
+
 (Hasil klasifikasi)
 <img width="348" alt="image" src="https://user-images.githubusercontent.com/57905354/189805362-ec3b5e1b-a5ef-4a20-90dc-f257bf404194.png">
 
