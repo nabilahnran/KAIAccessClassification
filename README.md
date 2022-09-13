@@ -25,9 +25,11 @@ Proyek ini adalah salah satu proyek dalam kegiatan magang yang dilakukan di PT K
 **Gambaran Prototype Klasifikasi Data Ulasan KAI Access
 
 (Proses pemasukan file)
+
 <img width="434" alt="image" src="https://user-images.githubusercontent.com/57905354/189805350-4aa752f8-c397-467a-91ec-b6a87a976602.png">
 
 (Hasil klasifikasi)
+
 <img width="348" alt="image" src="https://user-images.githubusercontent.com/57905354/189805362-ec3b5e1b-a5ef-4a20-90dc-f257bf404194.png">
 
   
