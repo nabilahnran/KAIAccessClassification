@@ -34,4 +34,5 @@ Proyek ini adalah salah satu proyek dalam kegiatan magang yang dilakukan di PT K
 <img width="348" alt="image" src="https://user-images.githubusercontent.com/57905354/189805362-ec3b5e1b-a5ef-4a20-90dc-f257bf404194.png">
 
   
-*Dokumen yang dicantumkan pada github hanya code pengembangan prototype sistem klasifikasi otomatis, pengembangan model bersifat privat.
+(Dashboard data ulasan KAI Access dnegan Tableau)
+<img width="1280" alt="Screen Shot 2022-10-20 at 11 18 13" src="https://user-images.githubusercontent.com/57905354/196855440-3e1330f4-0caf-4744-a52f-d5cf0d0d984d.png">
