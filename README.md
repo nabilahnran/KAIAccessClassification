@@ -2,7 +2,7 @@
 Machine Learning Project
 
 ## Project of PT Kereta Api Indonesia Intership Program
-(have permission to public this project)
+disclaimer: I have permission to public this project, with note: there's no any data customer in it.
 
 Nabiilah Nuur Ainii, Islamic University of Indonesia (2022)
 
